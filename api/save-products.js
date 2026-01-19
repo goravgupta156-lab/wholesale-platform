@@ -1,29 +1,30 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient } = require('mongodb');
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Only POST allowed" });
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Only POST allowed' });
   }
 
-  // Step 2 ka link yahan se connect hoga
+  // Yahan humne CommonJS format use kiya hai jo warning khatam kar dega
   const client = new MongoClient(process.env.MONGODB_URI);
 
   try {
     await client.connect();
-
-    // Step 5 Fix: Agar data array nahi hai toh use array bana do
+    
+    // Step 5 ka fix: Safe check for array
     const products = Array.isArray(req.body) ? req.body : [req.body];
 
     const result = await client
-      .db("RishuOrnaments")
-      .collection("Products")
+      .db('RishuOrnaments')
+      .collection('Products')
       .insertMany(products);
 
-    res.status(200).json({ success: true, count: result.insertedCount });
+    return res.status(200).json({ success: true, count: result.insertedCount });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    // Isse humein asli error browser console mein dikhega
+    return res.status(500).json({ error: err.message });
   } finally {
     await client.close();
   }
-}
+};
