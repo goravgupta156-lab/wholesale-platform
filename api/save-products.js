@@ -1,11 +1,10 @@
-// Region changed to Mumbai
 const { MongoClient } = require('mongodb');
 
-// Ye line Vercel ki settings se auto-link uthayegi
-const uri = process.env.MONGODB_URI;
+// Humne yahan bina kisi variable ke seedha link daal diya hai
+const uri = "mongodb+srv://goravgupta156_db_user:TMypoYulbOpvNf5E@cluster0.bbxw5uq.mongodb.net/RishuOrnaments?retryWrites=true&w=majority";
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+    if (req.method !== 'POST') return res.status(405).json({ message: 'Only POST allowed' });
 
     const client = new MongoClient(uri);
 
@@ -15,10 +14,10 @@ export default async function handler(req, res) {
         const collection = db.collection('Products');
         
         const result = await collection.insertMany(req.body);
-        
         return res.status(200).json({ message: "Success", count: result.insertedCount });
     } catch (error) {
-        return res.status(500).json({ error: "DB Error", details: error.message });
+        console.error("DB Error:", error);
+        return res.status(500).json({ error: "Connection Failed", details: error.message });
     } finally {
         await client.close();
     }
