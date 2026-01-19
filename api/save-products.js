@@ -1,17 +1,19 @@
 const { MongoClient } = require('mongodb');
 
-// Simple link bina kisi database name ke
-const uri = "mongodb+srv://goravgupta156_db_user:TMypoYulbOpvNf5E@cluster0.bbxw5uq.mongodb.net/?retryWrites=true&w=majority";
-const client = new MongoClient(uri);
+// Ye line Vercel ki settings se auto-link uthayegi
+const uri = process.env.MONGODB_URI;
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).json({ message: 'Only POST allowed' });
+    if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
+
+    const client = new MongoClient(uri);
 
     try {
         await client.connect();
-        // Ye line pehli baar mein khud database bana degi
         const db = client.db('RishuOrnaments');
-        const result = await db.collection('Products').insertMany(req.body);
+        const collection = db.collection('Products');
+        
+        const result = await collection.insertMany(req.body);
         
         return res.status(200).json({ message: "Success", count: result.insertedCount });
     } catch (error) {
