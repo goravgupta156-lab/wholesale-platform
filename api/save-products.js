@@ -1,6 +1,5 @@
 const { MongoClient } = require('mongodb');
 
-// Humne yahan bina kisi variable ke seedha link daal diya hai
 const uri = "mongodb+srv://goravgupta156_db_user:TMypoYulbOpvNf5E@cluster0.bbxw5uq.mongodb.net/RishuOrnaments?retryWrites=true&w=majority";
 
 export default async function handler(req, res) {
