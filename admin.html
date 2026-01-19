@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Rishu Ornaments | Admin Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+        .login-box { max-width: 350px; margin: 100px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .dashboard { display: none; padding: 0 20px 20px 20px; }
+        
+        /* Fixed Header Logic */
+        .header-tools { 
+            position: sticky; top: 0; background: #fff; z-index: 1000; 
+            padding: 15px 20px; border-bottom: 3px solid #007bff; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-save { background: #28a745; color: white; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        .upload-bar { background: #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px dashed #ccc; }
+        
+        table { width: 100%; border-collapse: collapse; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f8f8f8; position: sticky; top: 75px; z-index: 999; }
+        
+        .low-stock { background-color: #ffcccc !important; }
+        .cat-rate { font-weight: bold; color: #007bff; font-size: 1.1em; }
+        input[type="number"] { width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginSection" class="login-box">
+        <h2 style="color:#333;">Admin Login</h2>
+        <input type="password" id="passInput" placeholder="Password (admin123)" style="width:90%; margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:5px;">
+        <input type="number" id="pinInput" placeholder="Birth Year (1995)" style="width:90%; margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:5px; display:none;">
+        <button onclick="checkLogin()" style="width:95%; padding:12px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Enter Dashboard</button>
+    </div>
+
+    <div id="adminDashboard" class="dashboard">
+        <div class="header-tools">
+            <h2 style="margin:0; color:#007bff;">Rishu Admin Panel</h2>
+            <div>
+                <label><strong>Global Margin %:</strong> </label>
+                <input type="number" id="globalPct" value="40" style="width:50px; padding:5px;" onchange="updateAllRates()">
+                <button class="btn-save" onclick="saveAll()">💾 SAVE ALL CHANGES</button>
+            </div>
+        </div>
+
+        <div class="upload-bar">
+            <label><strong>📁 Step 1: Bulk Upload Photos (Naming: RO101_short_6pcs.jpg): </strong></label>
+            <input type="file" id="fileUpload" multiple accept="image/*" onchange="handleBulkUpload()">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Product Name</th>
+                    <th>Packet Size</th>
+                    <th>Basic Rate (₹)</th>
+                    <th>Catalog Rate (₹)</th>
+                    <th>Weight (g)</th>
+                    <th>Stock Qty</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="productTableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // LOGIN CHECK
+        function checkLogin() {
+            const pass = document.getElementById('passInput').value;
+            const pinBox = document.getElementById('pinInput');
+            const pin = pinBox.value;
+
+            if (pass === "admin123") {
+                pinBox.style.display = "block";
+                if (pin === "1995") {
+                    document.getElementById('loginSection').style.display = "none";
+                    document.getElementById('adminDashboard').style.display = "block";
+                }
+            } else { alert("Wrong Password!"); }
+        }
+
+        // BULK UPLOAD WITH IMAGE PREVIEW
+        function handleBulkUpload() {
+            const files = document.getElementById('fileUpload').files;
+            const tableBody = document.getElementById('productTableBody');
+            const pct = document.getElementById('globalPct').value;
+            
+            for (let file of files) {
+                let nameParts = file.name.split('.')[0].split('_');
+                let pName = nameParts[0] + "_" + (nameParts[1] || "type");
+                let pSize = nameParts[2] ? nameParts[2].replace('pcs','') : "0";
+                
+                // Creates temporary image link for preview
+                let imgUrl = URL.createObjectURL(file); 
+                
+                let row = `
+                    <tr id="row_${pName}">
+                        <td><img src="${imgUrl}" width="60" height="60" style="object-fit:cover; border:1px solid #ddd; border-radius:4px;"></td>
+                        <td>${pName}</td>
+                        <td>${pSize} pcs</td>
+                        <td><input type="number" class="basic-rate" value="1000" oninput="calcRate(this)"></td>
+                        <td class="cat-rate">${Math.round(1000 + (1000 * pct / 100))}</td>
+                        <td><input type="number" value="250"></td>
+                        <td><input type="number" value="21" oninput="checkStock(this)"></td>
+                        <td><button onclick="this.parentElement.parentElement.remove()" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Hide</button></td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            }
+        }
+
+        function calcRate(input) {
+            const pct = document.getElementById('globalPct').value;
+            const basic = parseFloat(input.value) || 0;
+            const catRateCell = input.parentElement.nextElementSibling;
+            catRateCell.innerText = Math.round(basic + (basic * pct / 100));
+        }
+
+        function updateAllRates() {
+            document.querySelectorAll('.basic-rate').forEach(input => calcRate(input));
+        }
+
+        function checkStock(input) {
+            const row = input.parentElement.parentElement;
+            if (parseInt(input.value) < 21) { row.classList.add('low-stock'); }
+            else { row.classList.remove('low-stock'); }
+        }
+
+        async function saveAll() {
+    const rows = document.querySelectorAll('#productTableBody tr');
+    let productData = [];
+
+    rows.forEach(row => {
+        productData.push({
+            name: row.cells[1].innerText,
+            packetSize: row.cells[2].innerText,
+            basicRate: row.querySelector('.basic-rate').value,
+            catalogRate: row.querySelector('.cat-rate').innerText,
+            weight: row.querySelectorAll('input[type="number"]')[1].value,
+            stock: row.querySelectorAll('input[type="number"]')[2].value,
+            date: new Date()
+        });
+    });
+
+    // Data ko Backend bhej rahe hain
+    const response = await fetch('/api/save-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productData)
+    });
+
+    if (response.ok) {
+        alert("✅ Mubarak ho! Data MongoDB mein save ho gaya.");
+    } else {
+        alert("❌ Error: Data save nahi ho paya.");
+    }
+}
+    </script>
+</body>
+</html>
