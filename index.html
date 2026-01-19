@@ -1,23 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-    <title>Rishu Ornaments - Wholesale</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rishu Ornaments | Wholesale Jewelry Platform</title>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --dark: #1a1a1a;
+            --white: #ffffff;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: var(--dark);
+        }
+        header {
+            background-color: var(--dark);
+            color: var(--gold);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--gold);
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .hero {
+            text-align: center;
+            padding: 40px 0;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1515562141207-7a18b5ce7142?auto=format&fit=crop&w=1000&q=80');
+            background-size: cover;
+            color: var(--white);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .product-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            transition: 0.3s;
+        }
+        .product-card:hover {
+            background-color: #fffdf5;
+        }
+        .btn-offer {
+            background-color: var(--gold);
+            color: var(--dark);
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .price-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 120px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <h1>Rishu Ornaments Wholesale Platform</h1>
-    <p>Hum behtareen ornaments ke wholesale vikreta hain.</p>
-    
-    <hr>
-    
-    <h3>Product Checklist (Example):</h3>
-    <ul>
-        <li>Gold Necklace</li>
-        <li>Silver Rings</li>
-        <li>Diamond Bangles</li>
-    </ul>
 
-    <p>Apna Rate Offer Karein:</p>
-    <input type="number" placeholder="Enter Amount">
-    <button>Offer Bheinjein</button>
+    <header>
+        <h1>RISHU ORNAMENTS</h1>
+        <p>Premium Wholesale Jewelry Hub</p>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h2>Hamare Latest Collection Par Boli Lagayein</h2>
+            <p>Best Rates for Bulk Orders Only</p>
+        </div>
+
+        <div class="product-list">
+            <h3>Live Inventory</h3>
+            
+            <div class="product-card">
+                <div>
+                    <strong>Gold Necklace Set (22K)</strong>
+                    <p style="color: #666; font-size: 0.8em;">Weight: 45g | Stock: 10 Units</p>
+                </div>
+                <div>
+                    <input type="number" class="price-input" placeholder="Apna Rate">
+                    <button class="btn-offer">Offer Bheinjein</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div>
+                    <strong>Silver Antique Bangles</strong>
+                    <p style="color: #666; font-size: 0.8em;">Weight: 120g | Stock: 25 Units</p>
+                </div>
+                <div>
+                    <input type="number" class="price-input" placeholder="Apna Rate">
+                    <button class="btn-offer">Offer Bheinjein</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Rishu Ornaments Wholesale. All Rights Reserved.</p>
+    </footer>
+
 </body>
 </html>
