@@ -28,3 +28,11 @@ module.exports = async (req, res) => {
     await client.close();
   }
 };
+
+  catch (error) {
+    // Isse browser ke alert mein asli wajah dikhegi
+    return res.status(500).json({ 
+        error: "Server Error", 
+        details: error.message 
+    });
+}

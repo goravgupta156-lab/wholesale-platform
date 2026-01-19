@@ -132,7 +132,7 @@
             else { row.classList.remove('low-stock'); }
         }
 
-        async function saveAll() {
+       async function saveAll() {
     const rows = document.querySelectorAll('#productTableBody tr');
     let productData = [];
 
@@ -142,23 +142,22 @@
             packetSize: row.cells[2].innerText,
             basicRate: row.querySelector('.basic-rate').value,
             catalogRate: row.querySelector('.cat-rate').innerText,
-            weight: row.querySelectorAll('input[type="number"]')[1].value,
-            stock: row.querySelectorAll('input[type="number"]')[2].value,
-            date: new Date()
+            // PHOTO KA SIRF NAAM BHEJO, FILE NAHI
+            photoName: row.cells[1].innerText + ".jpg" 
         });
     });
 
-    // Data ko Backend bhej rahe hain
     const response = await fetch('/api/save-products', {
-        method: 'POST',
+        method: 'POST', // Ekdum confirm POST
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
+        body: JSON.stringify(productData) // Array format mein
     });
 
+    const result = await response.json();
     if (response.ok) {
-        alert("✅ Mubarak ho! Data MongoDB mein save ho gaya.");
+        alert("✅ Success: " + result.count + " products saved!");
     } else {
-        alert("❌ Error: Data save nahi ho paya.");
+        alert("❌ Error: " + (result.error || "Save fail ho gaya"));
     }
 }
     </script>
