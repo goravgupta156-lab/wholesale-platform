@@ -3,85 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rishu Ornaments | Premium Jewelry Catalog</title>
+    <title>Rishu Ornaments | Premium Jewelry</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-        header { background: #232f3e; color: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        :root { --amazon-blue: #232f3e; --amazon-gold: #febd69; --price-red: #B12704; }
+        body { font-family: 'Segoe UI', sans-serif; background: #eaeded; margin: 0; padding-bottom: 50px; }
         
-        .catalog-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px 5%; }
+        /* Navbar Mobile Optimized */
+        header { background: var(--amazon-blue); color: white; padding: 12px 15px; position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+        .nav-top { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.2rem; font-weight: bold; color: var(--amazon-gold); }
         
-        /* Amazon Style Product Card */
-        .product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.3s; position: relative; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        
-        .img-box { width: 100%; height: 250px; overflow: hidden; background: #eee; cursor: zoom-in; }
-        .img-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
-        .img-box:hover img { transform: scale(1.5); } /* Zoom Effect */
+        /* Search Bar */
+        .search-container { display: flex; background: white; border-radius: 6px; overflow: hidden; }
+        .search-container input { border: none; padding: 10px; flex: 1; outline: none; }
+        .search-btn { background: var(--amazon-gold); border: none; padding: 10px 15px; cursor: pointer; }
 
-        .details { padding: 15px; }
-        .p-name { font-size: 1.1rem; font-weight: bold; color: #333; margin: 0; }
-        .p-type { font-size: 0.8rem; color: #666; margin: 5px 0; }
+        /* Product Grid - Mobile 2 Columns */
+        .catalog-container { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 10px; 
+            padding: 10px; 
+        }
+
+        /* Card Design */
+        .product-card { background: white; border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .img-box { width: 100%; height: 180px; background: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .details { padding: 10px; flex: 1; display: flex; flex-direction: column; }
+        .p-name { font-size: 0.95rem; color: #0F1111; margin: 0; font-weight: 500; height: 40px; overflow: hidden; }
         
-        .price-box { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-        .price { font-size: 1.4rem; color: #B12704; font-weight: bold; }
-        .neg-badge { background: #fff3e0; color: #e65100; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #ffcc80; font-weight: bold; }
+        .price-row { margin-top: auto; padding-top: 5px; }
+        .price { font-size: 1.2rem; color: var(--price-red); font-weight: bold; }
+        .neg-badge { font-size: 0.65rem; color: #007600; font-weight: bold; display: block; margin-top: 2px; }
         
-        .btn-cart { width: 100%; background: #febd69; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-        .btn-cart:hover { background: #f3a847; }
-        
-        .wishlist-btn { position: absolute; top: 10px; right: 10px; background: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #ccc; font-size: 1.2rem; }
-        .wishlist-btn.active { color: red; }
+        .btn-cart { background: var(--amazon-gold); border: 1px solid #a88734; padding: 8px; border-radius: 8px; margin-top: 8px; width: 100%; font-size: 0.85rem; cursor: pointer; }
+
+        .loader { text-align: center; padding: 50px; color: var(--amazon-blue); font-weight: bold; }
+
+        /* Desktop Adjustments */
+        @media (min-width: 768px) {
+            .catalog-container { grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px 5%; }
+            .img-box { height: 250px; }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h2>Rishu Ornaments</h2>
-    <div>
-        <span>🛒 Cart (0)</span> | <span>👤 Login</span>
+    <div class="nav-top">
+        <div class="logo">Rishu Ornaments</div>
+        <div style="font-size: 1.1rem;">👤 Login</div>
+    </div>
+    <div class="search-container">
+        <input type="text" placeholder="Search Payal, Bichhiya...">
+        <button class="search-btn">🔍</button>
     </div>
 </header>
 
-<div class="catalog-container" id="catalog">
-    <p style="text-align: center; grid-column: 1/-1;">Loading Rishu Jewelry...</p>
-</div>
+<div id="loading" class="loader">Hisaab-Kitab loading ho raha hai...</div>
+<div class="catalog-container" id="catalog"></div>
 
 <script>
-    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec";
 
     async function loadCatalog() {
         try {
             const response = await fetch(SCRIPT_URL + "?action=readProducts");
             const products = await response.json();
+            
+            document.getElementById('loading').style.display = 'none';
             const container = document.getElementById('catalog');
-            container.innerHTML = ''; // Loading text hatane ke liye
+            container.innerHTML = ''; 
+
+            if (products.length === 0) {
+                container.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Abhi koi product nahi hai!</p>";
+                return;
+            }
 
             products.forEach(p => {
                 container.innerHTML += `
                     <div class="product-card">
-                        <button class="wishlist-btn" onclick="toggleWish(this)">❤</button>
                         <div class="img-box">
-                            <img src="${p.imageUrl}" alt="${p.name}">
+                            <img src="${p.imageUrl}" alt="${p.name}" loading="lazy">
                         </div>
                         <div class="details">
-                            <p class="p-name">${p.name}</p>
-                            <p class="p-type">${p.type} | ${p.pieces} pcs</p>
-                            <div class="price-box">
+                            <p class="p-name">${p.name} (${p.type})</p>
+                            <div class="price-row">
                                 <span class="price">₹${p.catalogRate}</span>
-                                <span class="neg-badge">NEGOTIATION</span>
+                                <span class="neg-badge">NEGOTIATION ON BULK</span>
+                                <small style="color: #565959; font-size: 0.75rem;">${p.pieces} pieces per pkt</small>
                             </div>
-                            <button class="btn-cart" onclick="addToCart('${p.id}')">Add to Cart</button>
+                            <button class="btn-cart" onclick="alert('Pehle Login karein!')">Add to Cart</button>
                         </div>
                     </div>
                 `;
             });
         } catch (err) {
-            console.error("Catalog Load Fail:", err);
+            document.getElementById('loading').innerHTML = "⚠️ Data load nahi hua. Check Apps Script Deploy URL!";
+            console.error(err);
         }
     }
-
-    function toggleWish(btn) { btn.classList.toggle('active'); }
-    function addToCart(id) { alert("Login required for ordering!"); }
 
     window.onload = loadCatalog;
 </script>
