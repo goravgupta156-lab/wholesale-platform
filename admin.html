@@ -2,76 +2,96 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Rishu Ornaments | Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rishu Ornaments | Advance Admin Panel</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-        .login-box { max-width: 350px; margin: 100px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        .dashboard { display: none; padding: 0 20px 20px 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
         
-        /* Fixed Header Logic */
+        /* High Security Login Box */
+        .login-box { max-width: 400px; margin: 100px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; }
+        .login-box input { width: 90%; margin-bottom: 20px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        
+        .dashboard { display: none; }
+
+        /* Amazon Style Header */
         .header-tools { 
-            position: sticky; top: 0; background: #fff; z-index: 1000; 
-            padding: 15px 20px; border-bottom: 3px solid #007bff; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky; top: 0; background: #232f3e; color: white; z-index: 1000; 
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .btn-save { background: #28a745; color: white; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 5px; }
-        .upload-bar { background: #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px dashed #ccc; }
+        .btn-save { background: #febd69; color: #131921; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; }
+        .btn-save:hover { background: #f3a847; }
+
+        .container { padding: 20px; }
+        .upload-section { background: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; border: 2px dashed #007bff; text-align: center; }
         
-        table { width: 100%; border-collapse: collapse; background: #fff; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background: #f8f8f8; position: sticky; top: 75px; z-index: 999; }
+        /* Advanced Table Style */
+        .table-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; color: #495057; }
+        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
         
-        .low-stock { background-color: #ffcccc !important; }
-        .cat-rate { font-weight: bold; color: #007bff; font-size: 1.1em; }
-        input[type="number"] { width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .low-stock { background-color: #fff5f5 !important; border-left: 5px solid #ff4d4d; }
+        .cat-rate { font-weight: bold; color: #B12704; font-size: 1.2em; }
+        input[type="number"], input[type="text"] { padding: 8px; border: 1px solid #ddd; border-radius: 5px; width: 100px; }
+        
+        .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .active-badge { background: #e6fffa; color: #38b2ac; }
     </style>
 </head>
 <body>
 
     <div id="loginSection" class="login-box">
-        <h2 style="color:#333;">Admin Login</h2>
-        <input type="password" id="passInput" placeholder="Password (admin123)" style="width:90%; margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:5px;">
-        <input type="number" id="pinInput" placeholder="Birth Year (1995)" style="width:90%; margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:5px; display:none;">
-        <button onclick="checkLogin()" style="width:95%; padding:12px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Enter Dashboard</button>
+        <h2 style="color:#232f3e;">Rishu Ornaments Security</h2>
+        <p>Admin Access Only</p>
+        <input type="password" id="passInput" placeholder="Password">
+        <input type="number" id="pinInput" placeholder="4-Digit PIN" style="display:none;">
+        <button onclick="checkLogin()" style="width:95%; padding:15px; background:#febd69; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Verify Identity</button>
     </div>
 
     <div id="adminDashboard" class="dashboard">
         <div class="header-tools">
-            <h2 style="margin:0; color:#007bff;">Rishu Admin Panel</h2>
+            <h2 style="margin:0;">Rishu Dashboard</h2>
             <div>
-                <label><strong>Global Margin %:</strong> </label>
-                <input type="number" id="globalPct" value="40" style="width:50px; padding:5px;" onchange="updateAllRates()">
-                <button class="btn-save" onclick="saveAll()">💾 SAVE ALL CHANGES</button>
+                <label>Global Margin: </label>
+                <input type="number" id="globalPct" value="40" style="width:50px;" onchange="updateAllRates()"> %
+                <button class="btn-save" onclick="saveToGoogleSheets()">💾 SAVE ALL TO CLOUD</button>
             </div>
         </div>
 
-        <div class="upload-bar">
-            <label><strong>📁 Step 1: Bulk Upload Photos (Naming: RO101_short_6pcs.jpg): </strong></label>
-            <input type="file" id="fileUpload" multiple accept="image/*" onchange="handleBulkUpload()">
-        </div>
+        <div class="container">
+            <div class="upload-section">
+                <h3>Bulk Upload Inventory</h3>
+                <p style="color: #666;">Drag & drop photos (Format: RO101_short_6pcs.jpg)</p>
+                <input type="file" id="fileUpload" multiple accept="image/*" onchange="handleBulkUpload()">
+            </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Photo</th>
-                    <th>Product Name</th>
-                    <th>Packet Size</th>
-                    <th>Basic Rate (₹)</th>
-                    <th>Catalog Rate (₹)</th>
-                    <th>Weight (g)</th>
-                    <th>Stock Qty</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="productTableBody">
-                </tbody>
-        </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Product Detail</th>
+                            <th>Basic Rate (Admin)</th>
+                            <th>Catalog Rate (Client)</th>
+                            <th>Weight (g)</th>
+                            <th>Stock Qty</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
-        // LOGIN CHECK
+        // REPLACE THIS with your Google Web App URL from Step 1
+        const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE"; 
+
         function checkLogin() {
             const pass = document.getElementById('passInput').value;
             const pinBox = document.getElementById('pinInput');
@@ -83,33 +103,36 @@
                     document.getElementById('loginSection').style.display = "none";
                     document.getElementById('adminDashboard').style.display = "block";
                 }
-            } else { alert("Wrong Password!"); }
+            } else { alert("Access Denied!"); }
         }
 
-        // BULK UPLOAD WITH IMAGE PREVIEW
         function handleBulkUpload() {
             const files = document.getElementById('fileUpload').files;
             const tableBody = document.getElementById('productTableBody');
             const pct = document.getElementById('globalPct').value;
             
             for (let file of files) {
-                let nameParts = file.name.split('.')[0].split('_');
-                let pName = nameParts[0] + "_" + (nameParts[1] || "type");
-                let pSize = nameParts[2] ? nameParts[2].replace('pcs','') : "0";
+                // AUTO-NAMING LOGIC (RO101_short_6pcs.jpg)
+                let fileName = file.name.split('.')[0];
+                let parts = fileName.split('_');
+                let pCode = parts[0] || "NEW";
+                let pType = parts[1] || "Normal";
+                let pSize = parts[2] ? parts[2].replace('pcs','') : "1";
                 
-                // Creates temporary image link for preview
                 let imgUrl = URL.createObjectURL(file); 
                 
                 let row = `
-                    <tr id="row_${pName}">
-                        <td><img src="${imgUrl}" width="60" height="60" style="object-fit:cover; border:1px solid #ddd; border-radius:4px;"></td>
-                        <td>${pName}</td>
-                        <td>${pSize} pcs</td>
+                    <tr class="product-row">
+                        <td><img src="${imgUrl}" class="img-preview"></td>
+                        <td>
+                            <strong>${pCode}</strong><br>
+                            <small>${pType} | ${pSize} pcs/pkt</small>
+                        </td>
                         <td><input type="number" class="basic-rate" value="1000" oninput="calcRate(this)"></td>
-                        <td class="cat-rate">${Math.round(1000 + (1000 * pct / 100))}</td>
-                        <td><input type="number" value="250"></td>
-                        <td><input type="number" value="21" oninput="checkStock(this)"></td>
-                        <td><button onclick="this.parentElement.parentElement.remove()" style="background:#dc3545; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Hide</button></td>
+                        <td class="cat-rate">${Math.round(1000 * (1 + pct/100))}</td>
+                        <td><input type="number" class="weight" value="250"></td>
+                        <td><input type="number" class="stock" value="21" oninput="checkStock(this)"></td>
+                        <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; border:none; background:none; cursor:pointer;">Remove</button></td>
                     </tr>`;
                 tableBody.innerHTML += row;
             }
@@ -119,7 +142,7 @@
             const pct = document.getElementById('globalPct').value;
             const basic = parseFloat(input.value) || 0;
             const catRateCell = input.parentElement.nextElementSibling;
-            catRateCell.innerText = Math.round(basic + (basic * pct / 100));
+            catRateCell.innerText = Math.round(basic * (1 + pct/100));
         }
 
         function updateAllRates() {
@@ -132,34 +155,33 @@
             else { row.classList.remove('low-stock'); }
         }
 
-       async function saveAll() {
-    const rows = document.querySelectorAll('#productTableBody tr');
-    let productData = [];
+        async function saveToGoogleSheets() {
+            const rows = document.querySelectorAll('.product-row');
+            let productData = [];
 
-    rows.forEach(row => {
-        productData.push({
-            name: row.cells[1].innerText,
-            packetSize: row.cells[2].innerText,
-            basicRate: row.querySelector('.basic-rate').value,
-            catalogRate: row.querySelector('.cat-rate').innerText,
-            // PHOTO KA SIRF NAAM BHEJO, FILE NAHI
-            photoName: row.cells[1].innerText + ".jpg" 
-        });
-    });
+            rows.forEach(row => {
+                productData.push({
+                    name: row.cells[1].querySelector('strong').innerText,
+                    type: row.cells[1].querySelector('small').innerText,
+                    basicRate: row.querySelector('.basic-rate').value,
+                    catalogRate: row.querySelector('.cat-rate').innerText,
+                    weight: row.querySelector('.weight').value,
+                    stock: row.querySelector('.stock').value
+                });
+            });
 
-    const response = await fetch('/api/save-products', {
-        method: 'POST', // Ekdum confirm POST
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData) // Array format mein
-    });
-
-    const result = await response.json();
-    if (response.ok) {
-        alert("✅ Success: " + result.count + " products saved!");
-    } else {
-        alert("❌ Error: " + (result.error || "Save fail ho gaya"));
-    }
-}
+            // Calling Google Apps Script
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(productData)
+                });
+                alert("Data Synced to Google Sheets Successfully!");
+            } catch (err) {
+                alert("Sync Failed. Check Internet!");
+            }
+        }
     </script>
 </body>
 </html>
