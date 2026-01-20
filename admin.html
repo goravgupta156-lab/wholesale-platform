@@ -34,11 +34,9 @@
         
         .low-stock { background-color: #fff5f5 !important; border-left: 5px solid #ff4d4d; }
         .cat-rate { font-weight: bold; color: #B12704; font-size: 1.2em; }
-        input[type="number"], input[type="text"] { padding: 8px; border: 1px solid #ddd; border-radius: 5px; width: 100px; }
+        input[type="number"], input[type="text"], select, input[type="password"] { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         
         .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .active-badge { background: #e6fffa; color: #38b2ac; }
     </style>
 </head>
 <body>
@@ -52,16 +50,38 @@
     </div>
 
     <div id="adminDashboard" class="dashboard">
+        
         <div class="header-tools">
             <h2 style="margin:0;">Rishu Dashboard</h2>
             <div>
                 <label>Global Margin: </label>
-                <input type="number" id="globalPct" value="40" style="width:50px;" onchange="updateAllRates()"> %
+                <input type="number" id="globalPct" value="40" style="width:50px;"> %
                 <button class="btn-save" onclick="saveToGoogleSheets()">💾 SAVE ALL TO CLOUD</button>
             </div>
         </div>
 
         <div class="container">
+            
+            <div class="upload-section" style="border-color: #28a745; margin-bottom: 40px; text-align: left;">
+                <h3 style="color: #28a745;">➕ Add New Employee Account</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <input type="text" id="empRealName" placeholder="Real Name (Aadhar)">
+                    <input type="text" id="empSiteName" placeholder="Site Name (Chat Name)">
+                    <select id="empRole">
+                        <option value="Negotiation">Negotiation Dept</option>
+                        <option value="Packaging">Packaging Dept</option>
+                        <option value="ShopStaff">Shop Staff</option>
+                    </select>
+                    <input type="number" id="empComm" placeholder="Comm % (e.g. 0.40)" step="0.01">
+                    <input type="number" id="empStarRate" placeholder="Star Rate (e.g. 2)">
+                    <input type="password" id="empPass" placeholder="Set Password">
+                    <input type="number" id="empBirthYear" placeholder="Birth Year (PIN)">
+                </div>
+                <button class="btn-save" style="background:#28a745; margin-top:20px; color: white;" onclick="addEmployee()">CREATE ACCOUNT</button>
+            </div>
+
+            <hr style="margin-bottom: 40px; border: 1px solid #ddd;">
+
             <div class="upload-section">
                 <h3>Bulk Upload Inventory</h3>
                 <p style="color: #666;">Drag & drop photos (Format: RO101_short_6pcs.jpg)</p>
@@ -81,57 +101,17 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody id="productTableBody">
-                        </tbody>
+                    <tbody id="productTableBody"></tbody>
                 </table>
             </div>
+
         </div>
     </div>
-     <div class="upload-section" style="border-color: #28a745; margin-top: 20px;">
-    <h3 style="color: #28a745;">Add New Employee</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 10px;">
-        <input type="text" id="empRealName" placeholder="Real Name (Aadhar)" style="width:auto;">
-        <input type="text" id="empSiteName" placeholder="Site Name (Chat Name)" style="width:auto;">
-        <select id="empRole" style="padding: 10px; border-radius: 8px;">
-            <option value="Negotiation">Negotiation Dept</option>
-            <option value="Packaging">Packaging Dept</option>
-            <option value="ShopStaff">Shop Staff</option>
-        </select>
-        <input type="number" id="empComm" placeholder="Comm % (e.g. 0.40)" step="0.01" style="width:auto;">
-        <input type="number" id="empStarRate" placeholder="Star Rate (e.g. 2)" style="width:auto;">
-        <input type="password" id="empPass" placeholder="Set Password" style="width:auto;">
-        <input type="number" id="empBirthYear" placeholder="Birth Year (PIN)" style="width:auto;">
-    </div>
-    <button class="btn-save" style="background:#28a745; margin-top:10px;" onclick="addEmployee()">➕ CREATE EMPLOYEE ACCOUNT</button>
-</div>
 
-<script>
-async function addEmployee() {
-    const empData = {
-        action: "addEmployee",
-        realName: document.getElementById('empRealName').value,
-        siteName: document.getElementById('empSiteName').value,
-        role: document.getElementById('empRole').value,
-        commPct: document.getElementById('empComm').value,
-        starRate: document.getElementById('empStarRate').value,
-        password: document.getElementById('empPass').value,
-        birthYear: document.getElementById('empBirthYear').value
-    };
-
-    const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(empData)
-    });
-    alert("Employee Account Created in Google Sheets!");
-    // Form clear kar do
-    document.querySelectorAll('.upload-section input').forEach(i => i.value = '');
-}
-</script>
     <script>
-        // REPLACE THIS with your Google Web App URL from Step 1
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec"; 
 
+        // 1. LOGIN LOGIC
         function checkLogin() {
             const pass = document.getElementById('passInput').value;
             const pinBox = document.getElementById('pinInput');
@@ -146,13 +126,42 @@ async function addEmployee() {
             } else { alert("Access Denied!"); }
         }
 
+        // 2. ADD EMPLOYEE LOGIC
+        async function addEmployee() {
+            const empData = {
+                action: "addEmployee",
+                realName: document.getElementById('empRealName').value,
+                siteName: document.getElementById('empSiteName').value,
+                role: document.getElementById('empRole').value,
+                commPct: document.getElementById('empComm').value,
+                starRate: document.getElementById('empStarRate').value,
+                password: document.getElementById('empPass').value,
+                birthYear: document.getElementById('empBirthYear').value
+            };
+
+            if(!empData.realName || !empData.password) { alert("Please fill important fields!"); return; }
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(empData)
+                });
+                alert("Employee Account Created Successfully!");
+                // Clear inputs
+                document.querySelectorAll('.upload-section input').forEach(i => i.value = '');
+            } catch (err) {
+                alert("Failed to add employee. Check internet.");
+            }
+        }
+
+        // 3. PRODUCT UPLOAD & CALCULATION LOGIC
         function handleBulkUpload() {
             const files = document.getElementById('fileUpload').files;
             const tableBody = document.getElementById('productTableBody');
             const pct = document.getElementById('globalPct').value;
             
             for (let file of files) {
-                // AUTO-NAMING LOGIC (RO101_short_6pcs.jpg)
                 let fileName = file.name.split('.')[0];
                 let parts = fileName.split('_');
                 let pCode = parts[0] || "NEW";
@@ -185,10 +194,6 @@ async function addEmployee() {
             catRateCell.innerText = Math.round(basic * (1 + pct/100));
         }
 
-        function updateAllRates() {
-            document.querySelectorAll('.basic-rate').forEach(input => calcRate(input));
-        }
-
         function checkStock(input) {
             const row = input.parentElement.parentElement;
             if (parseInt(input.value) < 21) { row.classList.add('low-stock'); }
@@ -197,8 +202,9 @@ async function addEmployee() {
 
         async function saveToGoogleSheets() {
             const rows = document.querySelectorAll('.product-row');
-            let productData = [];
+            if (rows.length === 0) { alert("No products to save!"); return; }
 
+            let productData = [];
             rows.forEach(row => {
                 productData.push({
                     name: row.cells[1].querySelector('strong').innerText,
@@ -210,14 +216,14 @@ async function addEmployee() {
                 });
             });
 
-            // Calling Google Apps Script
             try {
-                const response = await fetch(SCRIPT_URL, {
+                await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify(productData)
                 });
                 alert("Data Synced to Google Sheets Successfully!");
+                document.getElementById('productTableBody').innerHTML = ''; // Clear table
             } catch (err) {
                 alert("Sync Failed. Check Internet!");
             }
