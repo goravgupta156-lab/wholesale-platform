@@ -1,232 +1,121 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rishu Ornaments | Admin ERP</title>
-    <style>
-        :root { --sidebar-bg: #232f3e; --main-bg: #f0f2f5; --accent: #febd69; --success: #28a745; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--main-bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* Sidebar */
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: none; flex-direction: column; padding-top: 20px; }
-        .sidebar h2 { text-align: center; color: var(--accent); font-size: 1.3rem; margin-bottom: 30px; border-bottom: 1px solid #37475a; padding-bottom: 15px; }
-        .nav-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover, .nav-item.active { background: #37475a; border-left: 4px solid var(--accent); color: var(--accent); }
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec";
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/deimayg85/image/upload";
+    const CLOUDINARY_PRESET = "rishu_preset";
+    
+    // फाइलों को सुरक्षित रखने के लिए ग्लोबल स्टोर
+    window.fileStore = {};
 
-        /* Main Content */
-        .main-content { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
-        .header-top { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        
-        .tab-content { padding: 25px; display: none; }
-        .tab-content.active { display: block; }
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+    }
 
-        /* Login Box */
-        .login-box { max-width: 400px; margin: 100px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; }
-        .login-box input { width: 85%; margin-bottom: 20px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-        th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; color: #495057; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        
-        .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-primary { background: var(--accent); color: #131921; }
-        .btn-success { background: var(--success); color: white; }
-        .low-stock { background-color: #fff5f5 !important; border-left: 5px solid #ff4d4d; }
-    </style>
-</head>
-<body>
-
-    <div id="loginSection" style="width: 100%;">
-        <div class="login-box">
-            <h2 style="color:#232f3e;">Rishu Ornaments Security</h2>
-            <p>Admin Access Only</p>
-            <input type="password" id="passInput" placeholder="Password">
-            <input type="number" id="pinInput" placeholder="Enter PIN" style="display:none;">
-            <button onclick="checkLogin()" class="btn btn-primary" style="width:95%;">Verify Identity</button>
-        </div>
-    </div>
-
-    <div id="sidebar" class="sidebar">
-        <h2>RISHU ADMIN</h2>
-        <div class="nav-item active" onclick="showTab('inventory')">📦 Inventory</div>
-        <div class="nav-item" onclick="showTab('employees')">👥 Employees</div>
-        <div class="nav-item" onclick="showTab('customers')">💎 Customers</div>
-        <div class="nav-item" onclick="showTab('settings')">⚙️ Settings</div>
-        <div class="nav-item" style="margin-top: auto; background: #cc3300;" onclick="location.reload()">Logout</div>
-    </div>
-
-    <div id="mainView" class="main-content">
-        <div class="header-top">
-            <h3 id="tabTitle">Inventory Management</h3>
-            <div>
-                Margin: <input type="number" id="globalPct" value="40" style="width:40px;"> %
-                <button class="btn btn-primary" id="saveBtn" onclick="saveToGoogleSheets()">💾 SAVE ALL CHANGES</button>
-            </div>
-        </div>
-
-        <div class="container">
-            <div id="inventory" class="tab-content active">
-                <div class="card">
-                    <h3>Bulk Upload Inventory</h3>
-                    <input type="file" id="fileUpload" multiple accept="image/*" onchange="handleBulkUpload()">
-                </div>
-                <div class="card" style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Photo</th>
-                                <th>Detail</th>
-                                <th>Basic Rate</th>
-                                <th>Catalog Rate</th>
-                                <th>Weight</th>
-                                <th>Stock</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="employees" class="tab-content">
-                <div class="card">
-                    <h3>➕ Create New Employee Account</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <input type="text" id="empRealName" placeholder="Real Name (Aadhar)">
-                        <input type="text" id="empSiteName" placeholder="Site Name (Chat)">
-                        <select id="empRole">
-                            <option value="Negotiation">Negotiation Dept</option>
-                            <option value="Packaging">Packaging Dept</option>
-                        </select>
-                        <input type="password" id="empPass" placeholder="Set Password">
-                        <input type="number" id="empBirthYear" placeholder="Birth Year (PIN)">
-                    </div>
-                    <button class="btn btn-success" style="margin-top: 20px;" onclick="addEmployee()">CREATE ACCOUNT</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec";
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/deimayg85/image/upload";
-        const CLOUDINARY_PRESET = "rishu_preset";
-        
-        // Memory to store files
-        window.fileStore = {};
-
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-        }
-
-        function checkLogin() {
-            const pass = document.getElementById('passInput').value;
-            const pinBox = document.getElementById('pinInput');
-            if (pass === "admin123") {
-                pinBox.style.display = "block";
-                if (pinBox.value === "1995") {
-                    document.getElementById('loginSection').style.display = "none";
-                    document.getElementById('sidebar').style.display = "flex";
-                    document.getElementById('mainView').style.display = "flex";
-                }
-            } else { alert("Wrong Password!"); }
-        }
-
-        function handleBulkUpload() {
-            const files = document.getElementById('fileUpload').files;
-            const tableBody = document.getElementById('productTableBody');
-            const pct = document.getElementById('globalPct').value;
-
-            for (let file of files) {
-                let rowId = "ID_" + Math.random().toString(36).substr(2, 9);
-                window.fileStore[rowId] = file;
-
-                let parts = file.name.split('.')[0].split('_');
-                
-                let row = `
-                    <tr class="product-row" id="${rowId}">
-                        <td><img src="${URL.createObjectURL(file)}" class="img-preview"></td>
-                        <td><strong>${parts[0]}</strong><br><small>${parts[1] || ''}</small></td>
-                        <td><input type="number" class="basic-rate" value="1000" oninput="calcRate(this)"></td>
-                        <td class="cat-rate">${Math.round(1000 * (1 + pct/100))}</td>
-                        <td><input type="number" class="weight" value="250"></td>
-                        <td><input type="number" class="stock" value="21"></td>
-                        <td><button onclick="document.getElementById('${rowId}').remove(); delete window.fileStore['${rowId}'];" style="color:red; background:none; border:none; cursor:pointer;">Remove</button></td>
-                    </tr>`;
-                tableBody.insertAdjacentHTML('beforeend', row);
+    function checkLogin() {
+        const pass = document.getElementById('passInput').value;
+        const pinBox = document.getElementById('pinInput');
+        if (pass === "admin123") {
+            pinBox.style.display = "block";
+            if (pinBox.value === "1995") {
+                document.getElementById('loginSection').style.display = "none";
+                document.getElementById('sidebar').style.display = "flex";
+                document.getElementById('mainView').style.display = "flex";
             }
+        } else { alert("Wrong Password!"); }
+    }
+
+    function handleBulkUpload() {
+        const files = document.getElementById('fileUpload').files;
+        const tableBody = document.getElementById('productTableBody');
+        const pct = document.getElementById('globalPct').value;
+
+        for (let file of files) {
+            // हर रो के लिए एक यूनिक आईडी बनाएँ
+            let rowId = "ID_" + Math.random().toString(36).substr(2, 9);
+            // फाइल को इस आईडी के साथ स्टोर करें
+            window.fileStore[rowId] = file; 
+
+            let parts = file.name.split('.')[0].split('_');
+            
+            let row = `
+                <tr class="product-row" id="${rowId}">
+                    <td><img src="${URL.createObjectURL(file)}" class="img-preview"></td>
+                    <td><strong>${parts[0]}</strong><br><small>${parts[1] || ''}</small></td>
+                    <td><input type="number" class="basic-rate" value="1000" oninput="calcRate(this)"></td>
+                    <td class="cat-rate">${Math.round(1000 * (1 + pct/100))}</td>
+                    <td><input type="number" class="weight" value="250"></td>
+                    <td><input type="number" class="stock" value="21"></td>
+                    <td><button onclick="document.getElementById('${rowId}').remove(); delete window.fileStore['${rowId}'];" style="color:red; background:none; border:none; cursor:pointer;">Remove</button></td>
+                </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', row);
         }
+    }
 
-        function calcRate(input) {
-            const pct = document.getElementById('globalPct').value;
-            input.parentElement.nextElementSibling.innerText = Math.round(input.value * (1 + pct/100));
-        }
+    function calcRate(input) {
+        const pct = document.getElementById('globalPct').value;
+        input.parentElement.nextElementSibling.innerText = Math.round(input.value * (1 + pct/100));
+    }
 
-        async function saveToGoogleSheets() {
-            const rows = document.querySelectorAll('.product-row');
-            if (rows.length === 0) return alert("Upload some products first!");
+    async function saveToGoogleSheets() {
+        const rows = document.querySelectorAll('.product-row');
+        if (rows.length === 0) return alert("Upload some products first!");
 
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "⏳ UPLOADING TO CLOUD...";
-            btn.disabled = true;
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "⏳ UPLOADING TO CLOUD...";
+        btn.disabled = true;
 
-            let productData = [];
+        let productData = [];
 
-            for (let row of rows) {
-                let file = window.fileStore[row.id];
-                let finalUrl = "https://via.placeholder.com/300?text=Upload+Failed";
+        // एक-एक करके हर प्रोडक्ट को प्रोसेस करें
+        for (let row of rows) {
+            let file = window.fileStore[row.id]; // स्टोर से फाइल निकालें
+            let finalUrl = "https://via.placeholder.com/300?text=Upload+Failed";
 
-                if (file) {
-                    let fd = new FormData();
-                    fd.append("file", file);
-                    fd.append("upload_preset", CLOUDINARY_PRESET);
+            if (file) {
+                let fd = new FormData();
+                fd.append("file", file);
+                fd.append("upload_preset", CLOUDINARY_PRESET);
 
-                    try {
-                        const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
-                        const data = await res.json();
-                        if (data.secure_url) finalUrl = data.secure_url;
-                    } catch (err) { console.log(err); }
+                try {
+                    // क्लाउडिनरी पर अपलोड करें और इंतज़ार करें
+                    const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
+                    const data = await res.json();
+                    
+                    // अगर असली लिंक मिल गया, तो उसे इस्तेमाल करें
+                    if (data.secure_url) {
+                        finalUrl = data.secure_url;
+                        console.log("Upload Success:", finalUrl);
+                    }
+                } catch (err) { 
+                    console.error("Cloudinary Upload Error:", err); 
                 }
-
-                productData.push({
-                    action: "bulkUpload",
-                    name: row.cells[1].querySelector('strong').innerText,
-                    type: row.cells[1].querySelector('small').innerText,
-                    basicRate: row.querySelector('.basic-rate').value,
-                    catalogRate: row.querySelector('.cat-rate').innerText,
-                    weight: row.querySelector('.weight').value,
-                    stock: row.querySelector('.stock').value,
-                    imageUrl: finalUrl
-                });
             }
 
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
-                alert("SUCCESS! Data & Images Synced.");
-                document.getElementById('productTableBody').innerHTML = '';
-                window.fileStore = {};
-            } catch (e) { alert("Error saving to sheet."); }
-
-            btn.innerText = "💾 SAVE ALL CHANGES";
-            btn.disabled = false;
+            // अब डेटा तैयार करें (असली लिंक के साथ)
+            productData.push({
+                action: "bulkUpload",
+                name: row.cells[1].querySelector('strong').innerText,
+                type: row.cells[1].querySelector('small').innerText,
+                basicRate: row.querySelector('.basic-rate').value,
+                catalogRate: row.querySelector('.cat-rate').innerText,
+                weight: row.querySelector('.weight').value,
+                stock: row.querySelector('.stock').value,
+                imageUrl: finalUrl
+            });
         }
 
-        async function addEmployee() {
-            const empData = {
-                action: "addEmployee",
-                realName: document.getElementById('empRealName').value,
-                siteName: document.getElementById('empSiteName').value,
-                role: document.getElementById('empRole').value,
-                password: document.getElementById('empPass').value,
-                birthYear: document.getElementById('empBirthYear').value
-            };
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(empData) });
-            alert("Employee Added!");
+        // अब सारा डेटा गूगल शीट पर भेजें
+        try {
+            btn.innerText = "⏳ SAVING TO SHEET...";
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
+            alert("SUCCESS! Data & Real Images Synced.");
+            document.getElementById('productTableBody').innerHTML = '';
+            window.fileStore = {}; // स्टोर खाली करें
+        } catch (e) { 
+            alert("Error saving to sheet. Check internet."); 
         }
-    </script>
-</body>
-</html>
+
+        btn.innerText = "💾 SAVE ALL CHANGES";
+        btn.disabled = false;
+    }
+</script>
