@@ -3,111 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rishu Ornaments | Premium Jewelry</title>
+    <title>Rishu Ornaments | Premium Catalog</title>
     <style>
         :root { --amazon-blue: #232f3e; --amazon-gold: #febd69; --price-red: #B12704; }
         body { font-family: 'Segoe UI', sans-serif; background: #eaeded; margin: 0; padding-bottom: 50px; }
-        
-        /* Navbar Mobile Optimized */
         header { background: var(--amazon-blue); color: white; padding: 12px 15px; position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-        .nav-top { display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.2rem; font-weight: bold; color: var(--amazon-gold); }
+        .catalog-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
         
-        /* Search Bar */
-        .search-container { display: flex; background: white; border-radius: 6px; overflow: hidden; }
-        .search-container input { border: none; padding: 10px; flex: 1; outline: none; }
-        .search-btn { background: var(--amazon-gold); border: none; padding: 10px 15px; cursor: pointer; }
+        .product-card { background: white; border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: 0.3s; }
+        
+        /* Zoom Effect on Click */
+        .img-box { width: 100%; height: 180px; display: flex; align-items: center; justify-content: center; background: #fff; cursor: zoom-in; overflow: hidden; }
+        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease; }
+        .img-box:active img { transform: scale(1.5); } /* Mobile zoom tap */
 
-        /* Product Grid - Mobile 2 Columns */
-        .catalog-container { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 10px; 
-            padding: 10px; 
+        .details { padding: 10px; flex: 1; }
+        .p-name { font-size: 0.95rem; font-weight: bold; margin: 0; height: 40px; overflow: hidden; color: #0F1111; }
+        .price { font-size: 1.3rem; color: var(--price-red); font-weight: bold; margin-top: 5px; display: block; }
+        
+        /* Chamaktar Negotiation Style */
+        .neg-chamkak { 
+            font-size: 1rem; 
+            color: #d4af37; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            display: block;
+            margin-top: 4px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            animation: blinker 1.5s linear infinite;
         }
+        @keyframes blinker { 50% { opacity: 0.5; } }
 
-        /* Card Design */
-        .product-card { background: white; border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .img-box { width: 100%; height: 180px; background: #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .img-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-        .details { padding: 10px; flex: 1; display: flex; flex-direction: column; }
-        .p-name { font-size: 0.95rem; color: #0F1111; margin: 0; font-weight: 500; height: 40px; overflow: hidden; }
+        .btn-cart { background: var(--amazon-gold); border: 1px solid #a88734; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .loader { text-align: center; padding: 50px; font-weight: bold; }
         
-        .price-row { margin-top: auto; padding-top: 5px; }
-        .price { font-size: 1.2rem; color: var(--price-red); font-weight: bold; }
-        .neg-badge { font-size: 0.65rem; color: #007600; font-weight: bold; display: block; margin-top: 2px; }
-        
-        .btn-cart { background: var(--amazon-gold); border: 1px solid #a88734; padding: 8px; border-radius: 8px; margin-top: 8px; width: 100%; font-size: 0.85rem; cursor: pointer; }
+        @media (min-width: 768px) { .catalog-container { grid-template-columns: repeat(4, 1fr); } .img-box { height: 250px; } }
 
-        .loader { text-align: center; padding: 50px; color: var(--amazon-blue); font-weight: bold; }
-
-        /* Desktop Adjustments */
-        @media (min-width: 768px) {
-            .catalog-container { grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px 5%; }
-            .img-box { height: 250px; }
-        }
+        /* Modal for Zoom */
+        #zoomModal { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        #zoomModal img { max-width: 90%; max-height: 90%; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="nav-top">
-        <div class="logo">Rishu Ornaments</div>
-        <div style="font-size: 1.1rem;">👤 Login</div>
-    </div>
-    <div class="search-container">
-        <input type="text" placeholder="Search Payal, Bichhiya...">
-        <button class="search-btn">🔍</button>
-    </div>
-</header>
-
-<div id="loading" class="loader">Hisaab-Kitab loading ho raha hai...</div>
+<header><div class="logo">Rishu Ornaments</div></header>
+<div id="loading" class="loader">Tijori se data nikal raha hai...</div>
 <div class="catalog-container" id="catalog"></div>
+
+<div id="zoomModal" onclick="this.style.display='none'"><img id="modalImg"></div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec";
 
+    function openZoom(url) {
+        document.getElementById('modalImg').src = url;
+        document.getElementById('zoomModal').style.display = 'flex';
+    }
+
     async function loadCatalog() {
         try {
-            const response = await fetch(SCRIPT_URL + "?action=readProducts");
+            const response = await fetch(SCRIPT_URL);
             const products = await response.json();
-            
             document.getElementById('loading').style.display = 'none';
             const container = document.getElementById('catalog');
             container.innerHTML = ''; 
 
-            if (products.length === 0) {
-                container.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Abhi koi product nahi hai!</p>";
-                return;
-            }
-
             products.forEach(p => {
+                // Mapping using exact keys from Backend: imageUrl, name, catalogRate, pieces
+                const img = p.ImageURL || p.imageUrl || 'https://via.placeholder.com/300?text=No+Image';
                 container.innerHTML += `
                     <div class="product-card">
-                        <div class="img-box">
-                            <img src="${p.imageUrl}" alt="${p.name}" loading="lazy">
+                        <div class="img-box" onclick="openZoom('${img}')">
+                            <img src="${img}" alt="${p.name || p.Name}" loading="lazy">
                         </div>
                         <div class="details">
-                            <p class="p-name">${p.name} (${p.type})</p>
-                            <div class="price-row">
-                                <span class="price">₹${p.catalogRate}</span>
-                                <span class="neg-badge">NEGOTIATION ON BULK</span>
-                                <small style="color: #565959; font-size: 0.75rem;">${p.pieces} pieces per pkt</small>
-                            </div>
-                            <button class="btn-cart" onclick="alert('Pehle Login karein!')">Add to Cart</button>
+                            <p class="p-name">${p.name || p.Name} (${p.type || p.Type || ''})</p>
+                            <span class="price">₹${p.catalogRate || p.CatalogRate || '0'}</span>
+                            <span class="neg-chamkak">✨ NEGOTIATION ✨</span>
+                            <small style="color: #565959;">${p.pieces || p.Pieces || '6'} pieces per pkt</small>
+                            <button class="btn-cart">Add to Cart</button>
                         </div>
                     </div>
                 `;
             });
         } catch (err) {
-            document.getElementById('loading').innerHTML = "⚠️ Data load nahi hua. Check Apps Script Deploy URL!";
-            console.error(err);
+            document.getElementById('loading').innerHTML = "⚠️ Data load nahi hua.";
         }
     }
-
     window.onload = loadCatalog;
 </script>
-
 </body>
 </html>
