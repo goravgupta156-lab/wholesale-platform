@@ -87,7 +87,47 @@
             </div>
         </div>
     </div>
+     <div class="upload-section" style="border-color: #28a745; margin-top: 20px;">
+    <h3 style="color: #28a745;">Add New Employee</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 10px;">
+        <input type="text" id="empRealName" placeholder="Real Name (Aadhar)" style="width:auto;">
+        <input type="text" id="empSiteName" placeholder="Site Name (Chat Name)" style="width:auto;">
+        <select id="empRole" style="padding: 10px; border-radius: 8px;">
+            <option value="Negotiation">Negotiation Dept</option>
+            <option value="Packaging">Packaging Dept</option>
+            <option value="ShopStaff">Shop Staff</option>
+        </select>
+        <input type="number" id="empComm" placeholder="Comm % (e.g. 0.40)" step="0.01" style="width:auto;">
+        <input type="number" id="empStarRate" placeholder="Star Rate (e.g. 2)" style="width:auto;">
+        <input type="password" id="empPass" placeholder="Set Password" style="width:auto;">
+        <input type="number" id="empBirthYear" placeholder="Birth Year (PIN)" style="width:auto;">
+    </div>
+    <button class="btn-save" style="background:#28a745; margin-top:10px;" onclick="addEmployee()">➕ CREATE EMPLOYEE ACCOUNT</button>
+</div>
 
+<script>
+async function addEmployee() {
+    const empData = {
+        action: "addEmployee",
+        realName: document.getElementById('empRealName').value,
+        siteName: document.getElementById('empSiteName').value,
+        role: document.getElementById('empRole').value,
+        commPct: document.getElementById('empComm').value,
+        starRate: document.getElementById('empStarRate').value,
+        password: document.getElementById('empPass').value,
+        birthYear: document.getElementById('empBirthYear').value
+    };
+
+    const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(empData)
+    });
+    alert("Employee Account Created in Google Sheets!");
+    // Form clear kar do
+    document.querySelectorAll('.upload-section input').forEach(i => i.value = '');
+}
+</script>
     <script>
         // REPLACE THIS with your Google Web App URL from Step 1
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec"; 
