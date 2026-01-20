@@ -124,48 +124,64 @@
         }
 
         async function saveToGoogleSheets() {
-            const rows = document.querySelectorAll('.product-row');
-            if (rows.length === 0) return alert("No data to save!");
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "⏳ UPLOADING TO CLOUD...";
-            btn.disabled = true;
-            let productData = [];
+    const rows = document.querySelectorAll('.product-row');
+    if (rows.length === 0) return alert("Pehle products select karein!");
 
-            for (let row of rows) {
-                let file = window.fileStore[row.id];
-                let finalUrl = ""; 
+    const btn = document.getElementById('saveBtn');
+    btn.innerText = "⏳ UPLOADING...";
+    btn.disabled = true;
 
-                if (file) {
-                    let fd = new FormData();
-                    fd.append("file", file);
-                    fd.append("upload_preset", CLOUDINARY_PRESET);
-                    try {
-                        const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
-                        const data = await res.json();
-                        if (data.secure_url) finalUrl = data.secure_url;
-                    } catch (e) { console.error("Cloud Error:", e); }
-                }
+    let productData = [];
 
-                productData.push({
-                    action: "bulkUpload",
-                    name: row.cells[1].querySelector('strong').innerText,
-                    type: row.cells[1].querySelector('small').innerText,
-                    basicRate: row.querySelector('.basic-rate').value,
-                    catalogRate: row.querySelector('.cat-rate').innerText,
-                    weight: row.querySelector('.weight').value,
-                    stock: row.querySelector('.stock').value,
-                    imageUrl: finalUrl || "https://via.placeholder.com/300?text=Upload+Failed"
-                });
-            }
+    for (let row of rows) {
+        let file = window.fileStore[row.id];
+        let finalUrl = "";
+
+        if (file) {
+            let fd = new FormData();
+            fd.append("file", file);
+            fd.append("upload_preset", CLOUDINARY_PRESET);
 
             try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
-                alert("SUCCESS! Real images saved to Sheet.");
-                document.getElementById('productTableBody').innerHTML = '';
-                window.fileStore = {};
-            } catch (e) { alert("Sheet Sync Error!"); }
-            btn.innerText = "💾 SAVE ALL CHANGES"; btn.disabled = false;
+                const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
+                const data = await res.json();
+                if (data.secure_url) {
+                    finalUrl = data.secure_url; // Real Cloudinary Link
+                }
+            } catch (err) { console.error("Cloudinary Error:", err); }
         }
+
+        productData.push({
+            name: row.cells[1].querySelector('strong').innerText,
+            type: row.cells[1].querySelector('small').innerText,
+            basicRate: row.querySelector('.basic-rate').value,
+            catalogRate: row.querySelector('.cat-rate').innerText,
+            weight: row.querySelector('.weight').value,
+            stock: row.querySelector('.stock').value,
+            imageUrl: finalUrl // Asli link bhej rahe hain
+        });
+    }
+
+    // Aapki Summary wala FIX: Proper JSON bhej rahe hain bina no-cors ke confusion ke
+    try {
+        const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: "bulkUpload",
+                products: productData
+            })
+        });
+        
+        alert("SUCCESS! Sheet mein photo aa gayi hogi.");
+        document.getElementById('productTableBody').innerHTML = '';
+        window.fileStore = {};
+    } catch (e) {
+        alert("Sheet Error: " + e.message);
+    }
+
+    btn.innerText = "💾 SAVE ALL CHANGES";
+    btn.disabled = false;
+}
     </script>
 </body>
 </html>
