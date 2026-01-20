@@ -119,27 +119,12 @@
                 <div class="card">
                     <h3>💎 Customer Segmentation (A-E Groups)</h3>
                     <p>New customers start at Group E. High orders auto-upgrade them.</p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Shop Name</th>
-                                <th>Mobile</th>
-                                <th>Group</th>
-                                <th>Orders</th>
-                                <th>Special Discount %</th>
-                                <th>Manual Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customerTableBody">
-                            </tbody>
-                    </table>
                 </div>
             </div>
-
             <div id="settings" class="tab-content">
                 <div class="card">
                     <h3>ERP Settings</h3>
-                    <p>MOQ (Minimum Order Quantity) and Pincode Logic settings will appear here.</p>
+                    <p>MOQ and Pincode settings will appear here.</p>
                 </div>
             </div>
         </div>
@@ -147,8 +132,10 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec";
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/deimayg85/image/upload";
+        const CLOUDINARY_PRESET = "rishu_preset";
 
-        // TAB NAVIGATION
+        // 1. Tab Navigation
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -157,7 +144,7 @@
             document.getElementById('tabTitle').innerText = event.currentTarget.innerText;
         }
 
-        // LOGIN SYSTEM
+        // 2. Login Security
         function checkLogin() {
             const pass = document.getElementById('passInput').value;
             const pinBox = document.getElementById('pinInput');
@@ -171,7 +158,7 @@
             } else { alert("Wrong Password!"); }
         }
 
-        // BULK UPLOAD & AUTO-NAMING
+        // 3. Bulk Upload & File Memory Handling
         function handleBulkUpload() {
             const files = document.getElementById('fileUpload').files;
             const tableBody = document.getElementById('productTableBody');
@@ -184,8 +171,10 @@
                 let pType = parts[1] || "Normal";
                 let pSize = parts[2] ? parts[2].replace('pcs','') : "1";
                 
+                let rowId = "row_" + Date.now() + Math.random().toString(36).substr(2, 5);
+
                 let row = `
-                    <tr class="product-row">
+                    <tr class="product-row" id="${rowId}">
                         <td><img src="${URL.createObjectURL(file)}" class="img-preview"></td>
                         <td><strong>${pCode}</strong><br><small>${pType} | ${pSize} pcs</small></td>
                         <td><input type="number" class="basic-rate" value="1000" oninput="calcRate(this)"></td>
@@ -194,7 +183,14 @@
                         <td><input type="number" class="stock" value="21" oninput="checkStock(this)"></td>
                         <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; border:none; background:none; cursor:pointer;">Remove</button></td>
                     </tr>`;
-                tableBody.innerHTML += row;
+                
+                tableBody.insertAdjacentHTML('beforeend', row);
+                
+                // Store the actual file object on the row element
+                setTimeout(() => {
+                    const tr = document.getElementById(rowId);
+                    if(tr) tr.fileData = file;
+                }, 100);
             }
         }
 
@@ -209,66 +205,63 @@
             else input.parentElement.parentElement.classList.remove('low-stock');
         }
 
-        // SAVE DATA TO GOOGLE SHEETS
-       // 1. क्लाउडिनरी की सेटिंग्स (अपनी डिटेल्स यहाँ चेक कर लें)
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/deimayg85/image/upload";
-const CLOUDINARY_PRESET = "rishu_preset"; // यहाँ वही नाम लिखें जो आपने Preset में रखा था
+        // 4. Save to Sheets with Cloudinary Upload
+        async function saveToGoogleSheets() {
+            const rows = document.querySelectorAll('.product-row');
+            if (rows.length === 0) { alert("कोई डेटा नहीं है!"); return; }
 
-async function saveToGoogleSheets() {
-    const rows = document.querySelectorAll('.product-row');
-    if (rows.length === 0) { alert("कोई डेटा नहीं है!"); return; }
+            const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ फोटो अपलोड हो रही हैं...";
+            btn.disabled = true;
 
-    const btn = document.getElementById('saveBtn');
-    btn.innerText = "⏳ फोटो अपलोड हो रही हैं...";
-    btn.disabled = true;
+            let productData = [];
 
-    let productData = [];
+            for (let row of rows) {
+                let photoFile = row.fileData; // Get file from custom property
+                let finalImageUrl = "https://via.placeholder.com/300?text=Upload+Error";
 
-    for (let row of rows) {
-        let photoFile = row.dataset.file; // हमने फाइल को यहाँ स्टोर किया है
-        let finalImageUrl = "https://via.placeholder.com/300"; // डिफॉल्ट
+                if (photoFile) {
+                    const formData = new FormData();
+                    formData.append('file', photoFile);
+                    formData.append('upload_preset', CLOUDINARY_PRESET);
 
-        // फोटो को क्लाउडिनरी पर अपलोड करना
-        if (photoFile) {
-            const formData = new FormData();
-            formData.append('file', photoFile);
-            formData.append('upload_preset', CLOUDINARY_PRESET);
+                    try {
+                        const cloudRes = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                        const cloudData = await cloudRes.json();
+                        if(cloudData.secure_url) {
+                            finalImageUrl = cloudData.secure_url;
+                        }
+                    } catch (err) {
+                        console.error("Cloudinary Error:", err);
+                    }
+                }
+
+                productData.push({
+                    action: "bulkUpload",
+                    name: row.cells[1].querySelector('strong').innerText,
+                    type: row.cells[1].querySelector('small').innerText,
+                    basicRate: row.querySelector('.basic-rate').value,
+                    catalogRate: row.querySelector('.cat-rate').innerText,
+                    weight: row.querySelector('.weight').value,
+                    stock: row.querySelector('.stock').value,
+                    imageUrl: finalImageUrl
+                });
+            }
 
             try {
-                const cloudRes = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                const cloudData = await cloudRes.json();
-                finalImageUrl = cloudData.secure_url; // ये मिला असली लिंक!
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
+                alert("बधाई हो! असली फोटो के साथ डेटा सेव हो गया।");
+                document.getElementById('productTableBody').innerHTML = '';
             } catch (err) {
-                console.error("Cloudinary Error:", err);
+                alert("शीट सेव करने में दिक्कत आई। इंटरनेट चेक करें।");
             }
+            
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
 
-        productData.push({
-            action: "bulkUpload",
-            name: row.cells[1].querySelector('strong').innerText,
-            type: row.cells[1].querySelector('small').innerText,
-            basicRate: row.querySelector('.basic-rate').value,
-            catalogRate: row.querySelector('.cat-rate').innerText,
-            weight: row.querySelector('.weight').value,
-            stock: row.querySelector('.stock').value,
-            imageUrl: finalImageUrl // अब खाली नहीं जाएगा
-        });
-    }
-
-    // अब डेटा गूगल शीट पर भेजें
-    try {
-        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
-        alert("बधाई हो! असली फोटो के साथ डेटा सेव हो गया।");
-        document.getElementById('productTableBody').innerHTML = '';
-    } catch (err) {
-        alert("शीट सेव करने में दिक्कत आई।");
-    }
-    
-    btn.innerText = "💾 SAVE ALL CHANGES";
-    btn.disabled = false;
-}
-
-        // ADD EMPLOYEE
+        // 5. Add Employee
         async function addEmployee() {
             const empData = {
                 action: "addEmployee",
@@ -280,8 +273,10 @@ async function saveToGoogleSheets() {
                 password: document.getElementById('empPass').value,
                 birthYear: document.getElementById('empBirthYear').value
             };
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(empData) });
-            alert("Employee Account Created!");
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(empData) });
+                alert("Employee Account Created Successfully!");
+            } catch(e) { alert("Failed to add employee."); }
         }
     </script>
 </body>
