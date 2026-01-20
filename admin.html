@@ -8,7 +8,7 @@
         :root { --sidebar-bg: #232f3e; --main-bg: #f0f2f5; --accent: #febd69; --success: #28a745; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--main-bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar Styles */
+        /* Sidebar */
         .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: none; flex-direction: column; padding-top: 20px; }
         .sidebar h2 { text-align: center; color: var(--accent); font-size: 1.3rem; margin-bottom: 30px; border-bottom: 1px solid #37475a; padding-bottom: 15px; }
         .nav-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 10px; }
@@ -25,7 +25,6 @@
         .login-box { max-width: 400px; margin: 100px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; }
         .login-box input { width: 85%; margin-bottom: 20px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         
-        /* Cards & Tables */
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; color: #495057; }
@@ -36,8 +35,6 @@
         .btn-primary { background: var(--accent); color: #131921; }
         .btn-success { background: var(--success); color: white; }
         .low-stock { background-color: #fff5f5 !important; border-left: 5px solid #ff4d4d; }
-        
-        input[type="number"], input[type="text"], select { padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -45,7 +42,7 @@
     <div id="loginSection" style="width: 100%;">
         <div class="login-box">
             <h2 style="color:#232f3e;">Rishu Ornaments Security</h2>
-            <p>Admin Login Required</p>
+            <p>Admin Access Only</p>
             <input type="password" id="passInput" placeholder="Password">
             <input type="number" id="pinInput" placeholder="Enter PIN" style="display:none;">
             <button onclick="checkLogin()" class="btn btn-primary" style="width:95%;">Verify Identity</button>
@@ -56,9 +53,9 @@
         <h2>RISHU ADMIN</h2>
         <div class="nav-item active" onclick="showTab('inventory')">📦 Inventory</div>
         <div class="nav-item" onclick="showTab('employees')">👥 Employees</div>
-        <div class="nav-item" onclick="showTab('customers')">💎 Customers (Groups)</div>
+        <div class="nav-item" onclick="showTab('customers')">💎 Customers</div>
         <div class="nav-item" onclick="showTab('settings')">⚙️ Settings</div>
-        <div class="nav-item" style="margin-top: auto; background: #cc3300;" onclick="location.reload()">🚪 Logout</div>
+        <div class="nav-item" style="margin-top: auto; background: #cc3300;" onclick="location.reload()">Logout</div>
     </div>
 
     <div id="mainView" class="main-content">
@@ -74,7 +71,6 @@
             <div id="inventory" class="tab-content active">
                 <div class="card">
                     <h3>Bulk Upload Inventory</h3>
-                    <p style="font-size: 0.9rem; color: #666;">Naming Format: RO101_short_6pcs.jpg</p>
                     <input type="file" id="fileUpload" multiple accept="image/*" onchange="handleBulkUpload()">
                 </div>
                 <div class="card" style="overflow-x: auto;">
@@ -85,7 +81,7 @@
                                 <th>Detail</th>
                                 <th>Basic Rate</th>
                                 <th>Catalog Rate</th>
-                                <th>Weight (g)</th>
+                                <th>Weight</th>
                                 <th>Stock</th>
                                 <th>Action</th>
                             </tr>
@@ -104,27 +100,11 @@
                         <select id="empRole">
                             <option value="Negotiation">Negotiation Dept</option>
                             <option value="Packaging">Packaging Dept</option>
-                            <option value="ShopStaff">Shop Staff</option>
                         </select>
-                        <input type="number" id="empComm" placeholder="Comm % (e.g. 0.40)" step="0.01">
-                        <input type="number" id="empStarRate" placeholder="Star Rate (e.g. 2)">
                         <input type="password" id="empPass" placeholder="Set Password">
                         <input type="number" id="empBirthYear" placeholder="Birth Year (PIN)">
                     </div>
                     <button class="btn btn-success" style="margin-top: 20px;" onclick="addEmployee()">CREATE ACCOUNT</button>
-                </div>
-            </div>
-
-            <div id="customers" class="tab-content">
-                <div class="card">
-                    <h3>💎 Customer Segmentation (A-E Groups)</h3>
-                    <p>New customers start at Group E. High orders auto-upgrade them.</p>
-                </div>
-            </div>
-            <div id="settings" class="tab-content">
-                <div class="card">
-                    <h3>ERP Settings</h3>
-                    <p>MOQ and Pincode settings will appear here.</p>
                 </div>
             </div>
         </div>
@@ -134,17 +114,15 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec";
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/deimayg85/image/upload";
         const CLOUDINARY_PRESET = "rishu_preset";
+        
+        // Memory to store files
+        window.fileStore = {};
 
-        // 1. Tab Navigation
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-            document.getElementById('tabTitle').innerText = event.currentTarget.innerText;
         }
 
-        // 2. Login Security
         function checkLogin() {
             const pass = document.getElementById('passInput').value;
             const pinBox = document.getElementById('pinInput');
@@ -158,83 +136,60 @@
             } else { alert("Wrong Password!"); }
         }
 
-        // 3. Bulk Upload & File Memory Handling
         function handleBulkUpload() {
             const files = document.getElementById('fileUpload').files;
             const tableBody = document.getElementById('productTableBody');
             const pct = document.getElementById('globalPct').value;
-            
-            for (let file of files) {
-                let fileName = file.name.split('.')[0];
-                let parts = fileName.split('_');
-                let pCode = parts[0] || "NEW";
-                let pType = parts[1] || "Normal";
-                let pSize = parts[2] ? parts[2].replace('pcs','') : "1";
-                
-                let rowId = "row_" + Date.now() + Math.random().toString(36).substr(2, 5);
 
+            for (let file of files) {
+                let rowId = "ID_" + Math.random().toString(36).substr(2, 9);
+                window.fileStore[rowId] = file;
+
+                let parts = file.name.split('.')[0].split('_');
+                
                 let row = `
                     <tr class="product-row" id="${rowId}">
                         <td><img src="${URL.createObjectURL(file)}" class="img-preview"></td>
-                        <td><strong>${pCode}</strong><br><small>${pType} | ${pSize} pcs</small></td>
+                        <td><strong>${parts[0]}</strong><br><small>${parts[1] || ''}</small></td>
                         <td><input type="number" class="basic-rate" value="1000" oninput="calcRate(this)"></td>
-                        <td class="cat-rate" style="font-weight:bold; color:red;">${Math.round(1000 * (1 + pct/100))}</td>
+                        <td class="cat-rate">${Math.round(1000 * (1 + pct/100))}</td>
                         <td><input type="number" class="weight" value="250"></td>
-                        <td><input type="number" class="stock" value="21" oninput="checkStock(this)"></td>
-                        <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; border:none; background:none; cursor:pointer;">Remove</button></td>
+                        <td><input type="number" class="stock" value="21"></td>
+                        <td><button onclick="document.getElementById('${rowId}').remove(); delete window.fileStore['${rowId}'];" style="color:red; background:none; border:none; cursor:pointer;">Remove</button></td>
                     </tr>`;
-                
                 tableBody.insertAdjacentHTML('beforeend', row);
-                
-                // Store the actual file object on the row element
-                setTimeout(() => {
-                    const tr = document.getElementById(rowId);
-                    if(tr) tr.fileData = file;
-                }, 100);
             }
         }
 
         function calcRate(input) {
             const pct = document.getElementById('globalPct').value;
-            const basic = parseFloat(input.value) || 0;
-            input.parentElement.nextElementSibling.innerText = Math.round(basic * (1 + pct/100));
+            input.parentElement.nextElementSibling.innerText = Math.round(input.value * (1 + pct/100));
         }
 
-        function checkStock(input) {
-            if (parseInt(input.value) < 21) input.parentElement.parentElement.classList.add('low-stock');
-            else input.parentElement.parentElement.classList.remove('low-stock');
-        }
-
-        // 4. Save to Sheets with Cloudinary Upload
         async function saveToGoogleSheets() {
             const rows = document.querySelectorAll('.product-row');
-            if (rows.length === 0) { alert("कोई डेटा नहीं है!"); return; }
+            if (rows.length === 0) return alert("Upload some products first!");
 
             const btn = document.getElementById('saveBtn');
-            const originalText = btn.innerText;
-            btn.innerText = "⏳ फोटो अपलोड हो रही हैं...";
+            btn.innerText = "⏳ UPLOADING TO CLOUD...";
             btn.disabled = true;
 
             let productData = [];
 
             for (let row of rows) {
-                let photoFile = row.fileData; // Get file from custom property
-                let finalImageUrl = "https://via.placeholder.com/300?text=Upload+Error";
+                let file = window.fileStore[row.id];
+                let finalUrl = "https://via.placeholder.com/300?text=Upload+Failed";
 
-                if (photoFile) {
-                    const formData = new FormData();
-                    formData.append('file', photoFile);
-                    formData.append('upload_preset', CLOUDINARY_PRESET);
+                if (file) {
+                    let fd = new FormData();
+                    fd.append("file", file);
+                    fd.append("upload_preset", CLOUDINARY_PRESET);
 
                     try {
-                        const cloudRes = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                        const cloudData = await cloudRes.json();
-                        if(cloudData.secure_url) {
-                            finalImageUrl = cloudData.secure_url;
-                        }
-                    } catch (err) {
-                        console.error("Cloudinary Error:", err);
-                    }
+                        const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
+                        const data = await res.json();
+                        if (data.secure_url) finalUrl = data.secure_url;
+                    } catch (err) { console.log(err); }
                 }
 
                 productData.push({
@@ -245,38 +200,32 @@
                     catalogRate: row.querySelector('.cat-rate').innerText,
                     weight: row.querySelector('.weight').value,
                     stock: row.querySelector('.stock').value,
-                    imageUrl: finalImageUrl
+                    imageUrl: finalUrl
                 });
             }
 
             try {
                 await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
-                alert("बधाई हो! असली फोटो के साथ डेटा सेव हो गया।");
+                alert("SUCCESS! Data & Images Synced.");
                 document.getElementById('productTableBody').innerHTML = '';
-            } catch (err) {
-                alert("शीट सेव करने में दिक्कत आई। इंटरनेट चेक करें।");
-            }
-            
-            btn.innerText = originalText;
+                window.fileStore = {};
+            } catch (e) { alert("Error saving to sheet."); }
+
+            btn.innerText = "💾 SAVE ALL CHANGES";
             btn.disabled = false;
         }
 
-        // 5. Add Employee
         async function addEmployee() {
             const empData = {
                 action: "addEmployee",
                 realName: document.getElementById('empRealName').value,
                 siteName: document.getElementById('empSiteName').value,
                 role: document.getElementById('empRole').value,
-                commPct: document.getElementById('empComm').value,
-                starRate: document.getElementById('empStarRate').value,
                 password: document.getElementById('empPass').value,
                 birthYear: document.getElementById('empBirthYear').value
             };
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(empData) });
-                alert("Employee Account Created Successfully!");
-            } catch(e) { alert("Failed to add employee."); }
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(empData) });
+            alert("Employee Added!");
         }
     </script>
 </body>
