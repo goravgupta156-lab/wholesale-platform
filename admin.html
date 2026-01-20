@@ -210,33 +210,63 @@
         }
 
         // SAVE DATA TO GOOGLE SHEETS
-        async function saveToGoogleSheets() {
-            const rows = document.querySelectorAll('.product-row');
-            if (rows.length === 0) { alert("No data to save!"); return; }
-            
-            let productData = [];
-            rows.forEach(row => {
-                productData.push({
-                    action: "bulkUpload",
-                    name: row.cells[1].querySelector('strong').innerText,
-                    type: row.cells[1].querySelector('small').innerText,
-                    basicRate: row.querySelector('.basic-rate').value,
-                    catalogRate: row.querySelector('.cat-rate').innerText,
-                    weight: row.querySelector('.weight').value,
-                    stock: row.querySelector('.stock').value
-                });
-            });
+       // 1. क्लाउडिनरी की सेटिंग्स (अपनी डिटेल्स यहाँ चेक कर लें)
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/deimayg85/image/upload";
+const CLOUDINARY_PRESET = "rishu_preset"; // यहाँ वही नाम लिखें जो आपने Preset में रखा था
 
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = "⌛ SAVING...";
-            
+async function saveToGoogleSheets() {
+    const rows = document.querySelectorAll('.product-row');
+    if (rows.length === 0) { alert("कोई डेटा नहीं है!"); return; }
+
+    const btn = document.getElementById('saveBtn');
+    btn.innerText = "⏳ फोटो अपलोड हो रही हैं...";
+    btn.disabled = true;
+
+    let productData = [];
+
+    for (let row of rows) {
+        let photoFile = row.dataset.file; // हमने फाइल को यहाँ स्टोर किया है
+        let finalImageUrl = "https://via.placeholder.com/300"; // डिफॉल्ट
+
+        // फोटो को क्लाउडिनरी पर अपलोड करना
+        if (photoFile) {
+            const formData = new FormData();
+            formData.append('file', photoFile);
+            formData.append('upload_preset', CLOUDINARY_PRESET);
+
             try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
-                alert("Inventory Synced Successfully!");
-                document.getElementById('productTableBody').innerHTML = '';
-            } catch (err) { alert("Sync Error!"); }
-            btn.innerText = "💾 SAVE ALL CHANGES";
+                const cloudRes = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const cloudData = await cloudRes.json();
+                finalImageUrl = cloudData.secure_url; // ये मिला असली लिंक!
+            } catch (err) {
+                console.error("Cloudinary Error:", err);
+            }
         }
+
+        productData.push({
+            action: "bulkUpload",
+            name: row.cells[1].querySelector('strong').innerText,
+            type: row.cells[1].querySelector('small').innerText,
+            basicRate: row.querySelector('.basic-rate').value,
+            catalogRate: row.querySelector('.cat-rate').innerText,
+            weight: row.querySelector('.weight').value,
+            stock: row.querySelector('.stock').value,
+            imageUrl: finalImageUrl // अब खाली नहीं जाएगा
+        });
+    }
+
+    // अब डेटा गूगल शीट पर भेजें
+    try {
+        await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
+        alert("बधाई हो! असली फोटो के साथ डेटा सेव हो गया।");
+        document.getElementById('productTableBody').innerHTML = '';
+    } catch (err) {
+        alert("शीट सेव करने में दिक्कत आई।");
+    }
+    
+    btn.innerText = "💾 SAVE ALL CHANGES";
+    btn.disabled = false;
+}
 
         // ADD EMPLOYEE
         async function addEmployee() {
