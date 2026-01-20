@@ -3,159 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rishu Ornaments | Advance Admin Panel</title>
+    <title>Rishu Ornaments | Admin ERP</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+        :root { --sidebar-bg: #232f3e; --main-bg: #f0f2f5; --accent: #febd69; --success: #28a745; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--main-bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* High Security Login Box */
+        /* Sidebar Styles */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: none; flex-direction: column; padding-top: 20px; }
+        .sidebar h2 { text-align: center; color: var(--accent); font-size: 1.3rem; margin-bottom: 30px; border-bottom: 1px solid #37475a; padding-bottom: 15px; }
+        .nav-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover, .nav-item.active { background: #37475a; border-left: 4px solid var(--accent); color: var(--accent); }
+
+        /* Main Content */
+        .main-content { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
+        .header-top { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        
+        .tab-content { padding: 25px; display: none; }
+        .tab-content.active { display: block; }
+
+        /* Login Box */
         .login-box { max-width: 400px; margin: 100px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; }
-        .login-box input { width: 90%; margin-bottom: 20px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .login-box input { width: 85%; margin-bottom: 20px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         
-        .dashboard { display: none; }
-
-        /* Amazon Style Header */
-        .header-tools { 
-            position: sticky; top: 0; background: #232f3e; color: white; z-index: 1000; 
-            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .btn-save { background: #febd69; color: #131921; border: none; padding: 12px 25px; font-weight: bold; cursor: pointer; border-radius: 8px; transition: 0.3s; }
-        .btn-save:hover { background: #f3a847; }
-
-        .container { padding: 20px; }
-        .upload-section { background: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; border: 2px dashed #007bff; text-align: center; }
+        /* Cards & Tables */
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; color: #495057; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
         
-        /* Advanced Table Style */
-        .table-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f9fa; padding: 15px; text-align: left; border-bottom: 2px solid #dee2e6; color: #495057; }
-        td { padding: 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        
+        .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: #131921; }
+        .btn-success { background: var(--success); color: white; }
         .low-stock { background-color: #fff5f5 !important; border-left: 5px solid #ff4d4d; }
-        .cat-rate { font-weight: bold; color: #B12704; font-size: 1.2em; }
-        input[type="number"], input[type="text"], select, input[type="password"] { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         
-        .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
+        input[type="number"], input[type="text"], select { padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="loginSection" class="login-box">
-        <h2 style="color:#232f3e;">Rishu Ornaments Security</h2>
-        <p>Admin Access Only</p>
-        <input type="password" id="passInput" placeholder="Password">
-        <input type="number" id="pinInput" placeholder="4-Digit PIN" style="display:none;">
-        <button onclick="checkLogin()" style="width:95%; padding:15px; background:#febd69; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Verify Identity</button>
+    <div id="loginSection" style="width: 100%;">
+        <div class="login-box">
+            <h2 style="color:#232f3e;">Rishu Ornaments Security</h2>
+            <p>Admin Login Required</p>
+            <input type="password" id="passInput" placeholder="Password">
+            <input type="number" id="pinInput" placeholder="Enter PIN" style="display:none;">
+            <button onclick="checkLogin()" class="btn btn-primary" style="width:95%;">Verify Identity</button>
+        </div>
     </div>
 
-    <div id="adminDashboard" class="dashboard">
-        
-        <div class="header-tools">
-            <h2 style="margin:0;">Rishu Dashboard</h2>
+    <div id="sidebar" class="sidebar">
+        <h2>RISHU ADMIN</h2>
+        <div class="nav-item active" onclick="showTab('inventory')">📦 Inventory</div>
+        <div class="nav-item" onclick="showTab('employees')">👥 Employees</div>
+        <div class="nav-item" onclick="showTab('customers')">💎 Customers (Groups)</div>
+        <div class="nav-item" onclick="showTab('settings')">⚙️ Settings</div>
+        <div class="nav-item" style="margin-top: auto; background: #cc3300;" onclick="location.reload()">🚪 Logout</div>
+    </div>
+
+    <div id="mainView" class="main-content">
+        <div class="header-top">
+            <h3 id="tabTitle">Inventory Management</h3>
             <div>
-                <label>Global Margin: </label>
-                <input type="number" id="globalPct" value="40" style="width:50px;"> %
-                <button class="btn-save" onclick="saveToGoogleSheets()">💾 SAVE ALL TO CLOUD</button>
+                Margin: <input type="number" id="globalPct" value="40" style="width:40px;"> %
+                <button class="btn btn-primary" id="saveBtn" onclick="saveToGoogleSheets()">💾 SAVE ALL CHANGES</button>
             </div>
         </div>
 
         <div class="container">
-            
-            <div class="upload-section" style="border-color: #28a745; margin-bottom: 40px; text-align: left;">
-                <h3 style="color: #28a745;">➕ Add New Employee Account</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <input type="text" id="empRealName" placeholder="Real Name (Aadhar)">
-                    <input type="text" id="empSiteName" placeholder="Site Name (Chat Name)">
-                    <select id="empRole">
-                        <option value="Negotiation">Negotiation Dept</option>
-                        <option value="Packaging">Packaging Dept</option>
-                        <option value="ShopStaff">Shop Staff</option>
-                    </select>
-                    <input type="number" id="empComm" placeholder="Comm % (e.g. 0.40)" step="0.01">
-                    <input type="number" id="empStarRate" placeholder="Star Rate (e.g. 2)">
-                    <input type="password" id="empPass" placeholder="Set Password">
-                    <input type="number" id="empBirthYear" placeholder="Birth Year (PIN)">
+            <div id="inventory" class="tab-content active">
+                <div class="card">
+                    <h3>Bulk Upload Inventory</h3>
+                    <p style="font-size: 0.9rem; color: #666;">Naming Format: RO101_short_6pcs.jpg</p>
+                    <input type="file" id="fileUpload" multiple accept="image/*" onchange="handleBulkUpload()">
                 </div>
-                <button class="btn-save" style="background:#28a745; margin-top:20px; color: white;" onclick="addEmployee()">CREATE ACCOUNT</button>
+                <div class="card" style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Photo</th>
+                                <th>Detail</th>
+                                <th>Basic Rate</th>
+                                <th>Catalog Rate</th>
+                                <th>Weight (g)</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <hr style="margin-bottom: 40px; border: 1px solid #ddd;">
-
-            <div class="upload-section">
-                <h3>Bulk Upload Inventory</h3>
-                <p style="color: #666;">Drag & drop photos (Format: RO101_short_6pcs.jpg)</p>
-                <input type="file" id="fileUpload" multiple accept="image/*" onchange="handleBulkUpload()">
+            <div id="employees" class="tab-content">
+                <div class="card">
+                    <h3>➕ Create New Employee Account</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <input type="text" id="empRealName" placeholder="Real Name (Aadhar)">
+                        <input type="text" id="empSiteName" placeholder="Site Name (Chat)">
+                        <select id="empRole">
+                            <option value="Negotiation">Negotiation Dept</option>
+                            <option value="Packaging">Packaging Dept</option>
+                            <option value="ShopStaff">Shop Staff</option>
+                        </select>
+                        <input type="number" id="empComm" placeholder="Comm % (e.g. 0.40)" step="0.01">
+                        <input type="number" id="empStarRate" placeholder="Star Rate (e.g. 2)">
+                        <input type="password" id="empPass" placeholder="Set Password">
+                        <input type="number" id="empBirthYear" placeholder="Birth Year (PIN)">
+                    </div>
+                    <button class="btn btn-success" style="margin-top: 20px;" onclick="addEmployee()">CREATE ACCOUNT</button>
+                </div>
             </div>
 
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Photo</th>
-                            <th>Product Detail</th>
-                            <th>Basic Rate (Admin)</th>
-                            <th>Catalog Rate (Client)</th>
-                            <th>Weight (g)</th>
-                            <th>Stock Qty</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody"></tbody>
-                </table>
+            <div id="customers" class="tab-content">
+                <div class="card">
+                    <h3>💎 Customer Segmentation (A-E Groups)</h3>
+                    <p>New customers start at Group E. High orders auto-upgrade them.</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shop Name</th>
+                                <th>Mobile</th>
+                                <th>Group</th>
+                                <th>Orders</th>
+                                <th>Special Discount %</th>
+                                <th>Manual Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                            </tbody>
+                    </table>
+                </div>
             </div>
 
+            <div id="settings" class="tab-content">
+                <div class="card">
+                    <h3>ERP Settings</h3>
+                    <p>MOQ (Minimum Order Quantity) and Pincode Logic settings will appear here.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqwdu9HZ-EoF2o8f8D7H_jsCQvLdXQ0fvGc7R58a7cfqZbMI51-Had_wPg-nds10aU/exec";
 
-        // 1. LOGIN LOGIC
+        // TAB NAVIGATION
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            document.getElementById('tabTitle').innerText = event.currentTarget.innerText;
+        }
+
+        // LOGIN SYSTEM
         function checkLogin() {
             const pass = document.getElementById('passInput').value;
             const pinBox = document.getElementById('pinInput');
-            const pin = pinBox.value;
-
             if (pass === "admin123") {
                 pinBox.style.display = "block";
-                if (pin === "1995") {
+                if (pinBox.value === "1995") {
                     document.getElementById('loginSection').style.display = "none";
-                    document.getElementById('adminDashboard').style.display = "block";
+                    document.getElementById('sidebar').style.display = "flex";
+                    document.getElementById('mainView').style.display = "flex";
                 }
-            } else { alert("Access Denied!"); }
+            } else { alert("Wrong Password!"); }
         }
 
-        // 2. ADD EMPLOYEE LOGIC
-        async function addEmployee() {
-            const empData = {
-                action: "addEmployee",
-                realName: document.getElementById('empRealName').value,
-                siteName: document.getElementById('empSiteName').value,
-                role: document.getElementById('empRole').value,
-                commPct: document.getElementById('empComm').value,
-                starRate: document.getElementById('empStarRate').value,
-                password: document.getElementById('empPass').value,
-                birthYear: document.getElementById('empBirthYear').value
-            };
-
-            if(!empData.realName || !empData.password) { alert("Please fill important fields!"); return; }
-
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(empData)
-                });
-                alert("Employee Account Created Successfully!");
-                // Clear inputs
-                document.querySelectorAll('.upload-section input').forEach(i => i.value = '');
-            } catch (err) {
-                alert("Failed to add employee. Check internet.");
-            }
-        }
-
-        // 3. PRODUCT UPLOAD & CALCULATION LOGIC
+        // BULK UPLOAD & AUTO-NAMING
         function handleBulkUpload() {
             const files = document.getElementById('fileUpload').files;
             const tableBody = document.getElementById('productTableBody');
@@ -168,17 +184,12 @@
                 let pType = parts[1] || "Normal";
                 let pSize = parts[2] ? parts[2].replace('pcs','') : "1";
                 
-                let imgUrl = URL.createObjectURL(file); 
-                
                 let row = `
                     <tr class="product-row">
-                        <td><img src="${imgUrl}" class="img-preview"></td>
-                        <td>
-                            <strong>${pCode}</strong><br>
-                            <small>${pType} | ${pSize} pcs/pkt</small>
-                        </td>
+                        <td><img src="${URL.createObjectURL(file)}" class="img-preview"></td>
+                        <td><strong>${pCode}</strong><br><small>${pType} | ${pSize} pcs</small></td>
                         <td><input type="number" class="basic-rate" value="1000" oninput="calcRate(this)"></td>
-                        <td class="cat-rate">${Math.round(1000 * (1 + pct/100))}</td>
+                        <td class="cat-rate" style="font-weight:bold; color:red;">${Math.round(1000 * (1 + pct/100))}</td>
                         <td><input type="number" class="weight" value="250"></td>
                         <td><input type="number" class="stock" value="21" oninput="checkStock(this)"></td>
                         <td><button onclick="this.parentElement.parentElement.remove()" style="color:red; border:none; background:none; cursor:pointer;">Remove</button></td>
@@ -190,23 +201,23 @@
         function calcRate(input) {
             const pct = document.getElementById('globalPct').value;
             const basic = parseFloat(input.value) || 0;
-            const catRateCell = input.parentElement.nextElementSibling;
-            catRateCell.innerText = Math.round(basic * (1 + pct/100));
+            input.parentElement.nextElementSibling.innerText = Math.round(basic * (1 + pct/100));
         }
 
         function checkStock(input) {
-            const row = input.parentElement.parentElement;
-            if (parseInt(input.value) < 21) { row.classList.add('low-stock'); }
-            else { row.classList.remove('low-stock'); }
+            if (parseInt(input.value) < 21) input.parentElement.parentElement.classList.add('low-stock');
+            else input.parentElement.parentElement.classList.remove('low-stock');
         }
 
+        // SAVE DATA TO GOOGLE SHEETS
         async function saveToGoogleSheets() {
             const rows = document.querySelectorAll('.product-row');
-            if (rows.length === 0) { alert("No products to save!"); return; }
-
+            if (rows.length === 0) { alert("No data to save!"); return; }
+            
             let productData = [];
             rows.forEach(row => {
                 productData.push({
+                    action: "bulkUpload",
                     name: row.cells[1].querySelector('strong').innerText,
                     type: row.cells[1].querySelector('small').innerText,
                     basicRate: row.querySelector('.basic-rate').value,
@@ -216,17 +227,31 @@
                 });
             });
 
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "⌛ SAVING...";
+            
             try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(productData)
-                });
-                alert("Data Synced to Google Sheets Successfully!");
-                document.getElementById('productTableBody').innerHTML = ''; // Clear table
-            } catch (err) {
-                alert("Sync Failed. Check Internet!");
-            }
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(productData) });
+                alert("Inventory Synced Successfully!");
+                document.getElementById('productTableBody').innerHTML = '';
+            } catch (err) { alert("Sync Error!"); }
+            btn.innerText = "💾 SAVE ALL CHANGES";
+        }
+
+        // ADD EMPLOYEE
+        async function addEmployee() {
+            const empData = {
+                action: "addEmployee",
+                realName: document.getElementById('empRealName').value,
+                siteName: document.getElementById('empSiteName').value,
+                role: document.getElementById('empRole').value,
+                commPct: document.getElementById('empComm').value,
+                starRate: document.getElementById('empStarRate').value,
+                password: document.getElementById('empPass').value,
+                birthYear: document.getElementById('empBirthYear').value
+            };
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(empData) });
+            alert("Employee Account Created!");
         }
     </script>
 </body>
